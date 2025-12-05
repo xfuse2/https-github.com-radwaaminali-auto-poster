@@ -1,0 +1,5 @@
+{
+  "name": "Facebook Auto-Poster",
+  "description": "A professional tool to publish content directly to a Facebook Page using the Graph API.",
+  "requestFramePermissions": []
+}
