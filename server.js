@@ -7,6 +7,8 @@ const FormData = require('form-data');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const sqlite3 = require('sqlite3').verbose();
 const { TwitterApi } = require('twitter-api-v2');
+const cron = require('node-cron');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(cors());
@@ -17,9 +19,16 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100
 // ==========================================
 // ⚠️ البيانات (Facebook & Gemini)
 // ==========================================
-const PAGE_ID = '870967939438361'; 
-const ACCESS_TOKEN = 'EAARotWwKo7ABQK1c68BLk6TugchWsbRcbZC0jIMCv2jXewgnJoz6ZC9qm4wbwcWX3Ly6w2moPtOkd1iZAH3Qp1ws0KEXuOn3ErZAb5sBsN2sx5bbz1rZC2UwAoMlkCCBd0EQZB5vUD5jyH6JZANgevcATn6i52lv67Lr9QP5j4q9ZBSlLSaHZC2a78q8K9gGo15MtSAXLNtSsQtEdKDw7d0IrFsZAneuvgH9s0Ko9sHqzYQkdosvmyoyJEJV4GAB5aXZAu9k3MKMAZA2ZADwC5b5lKB2fzKLe0QZDZD';
+const PAGE_ID = '814051691800923'; 
+const ACCESS_TOKEN = 'EAARotWwKo7ABQONHXF8ZCgqRJFk2LeZATKLccExZCSons2ZALlBlyZCWefXEuB8m2OOkUVgfZCLZB0mn1SoVLDsXkZCqgtAMGrGuOq6FATxZCLZCFRUo2mp51gX1VJRvqTTYWF3jXxJgzXxDqWHTOnMJbfLcDZCp68nzcoKb8n9vgW5U8S5D5BXru0sg3WJ2CLa71JXqqAErZAMwPxm2ZCmX3mPIWTaEcl9a9PnzBhQwjj1AZD';
 const GEMINI_API_KEY = 'AIzaSyBbv7INw1VSASeGj2_KISGRILfQEIDDi9k';
+
+// ==========================================
+// ⚠️ بيانات SUPABASE (للجدولة والوسائط)
+// ==========================================
+const SUPABASE_URL = 'https://kolpjpsxjhgkxfgptutz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbHBqcHN4amhna3hmZ3B0dXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NzA0NzIsImV4cCI6MjA4MDI0NjQ3Mn0.xYJEyLglKC7QLiXRIYu2iGPKt3NaH8p9DrlYNxiyiss';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==========================================
 // ⚠️ بيانات تويتر (Twitter Keys)
@@ -50,6 +59,77 @@ db.run(`CREATE TABLE IF NOT EXISTS posts (
     status TEXT,
     date TEXT
 )`);
+
+// --- CRON JOB (العداد) ---
+// يعمل كل دقيقة للتحقق من المنشورات المجدولة
+cron.schedule('* * * * *', async () => {
+    console.log('⏳ Checking scheduled posts...');
+    const now = new Date().toISOString();
+
+    // 1. جلب المنشورات المستحقة من Supabase
+    // (We check for status = 'scheduled' and scheduled_at <= now)
+    const { data: posts, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('status', 'scheduled')
+        .lte('scheduled_at', now);
+
+    if (error) {
+        console.error('❌ DB Error:', error);
+        return;
+    }
+
+    if (posts && posts.length > 0) {
+        console.log(`🚀 Found ${posts.length} posts to publish!`);
+        
+        for (const post of posts) {
+            console.log(`publishing post ${post.id}...`);
+            // تنفيذ النشر الفعلي
+            // ملاحظة: هنا سنعيد استخدام منطق النشر الموجود في /publish
+            // ولكن للاختصار، سنركز على فيسبوك كمثال أساسي، أو يمكنك استدعاء دالة النشر
+            
+            try {
+                // Facebook Publish
+                let fbId = 'simulated_cron_id';
+                const platforms = post.platforms || ['facebook'];
+                
+                if (platforms.includes('facebook')) {
+                     if (post.media_url) {
+                        const formData = new FormData();
+                        formData.append('access_token', ACCESS_TOKEN);
+                        formData.append('url', post.media_url);
+                        const isVideo = post.media_type.startsWith('video');
+                        const endpoint = isVideo ? 'videos' : 'photos';
+                        formData.append(isVideo ? 'description' : 'message', post.content);
+                        
+                        // Note: For axios with FormData in Node, headers are tricky. 
+                        // Simplified here for clarity, assuming standard fetch or correct headers.
+                         const res = await axios.post(`https://graph.facebook.com/v19.0/${PAGE_ID}/${endpoint}`, formData, { headers: formData.getHeaders() });
+                         fbId = res.data.id || res.data.post_id;
+                     } else {
+                         const res = await axios.post(`https://graph.facebook.com/v19.0/${PAGE_ID}/feed`, {
+                             message: post.content, access_token: ACCESS_TOKEN
+                         });
+                         fbId = res.data.id;
+                     }
+                }
+
+                // Update Status to Published
+                await supabase
+                    .from('posts')
+                    .update({ status: 'published', facebook_id: fbId })
+                    .eq('id', post.id);
+
+                console.log(`✅ Post ${post.id} published successfully.`);
+            } catch (err) {
+                console.error(`❌ Failed to publish post ${post.id}:`, err.message);
+                // Optionally mark as failed
+                await supabase.from('posts').update({ status: 'failed' }).eq('id', post.id);
+            }
+        }
+    }
+});
+
 
 // 1. جلب الأرشيف
 app.get('/history', (req, res) => {

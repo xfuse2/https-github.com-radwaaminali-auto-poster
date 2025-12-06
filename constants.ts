@@ -4,9 +4,9 @@
 // ==========================================
 // 1. FACEBOOK & INSTAGRAM
 // ==========================================
-export const FACEBOOK_PAGE_ID = '870967939438361';
-export const FACEBOOK_ACCESS_TOKEN = 'EAARotWwKo7ABQK1c68BLk6TugchWsbRcbZC0jIMCv2jXewgnJoz6ZC9qm4wbwcWX3Ly6w2moPtOkd1iZAH3Qp1ws0KEXuOn3ErZAb5sBsN2sx5bbz1rZC2UwAoMlkCCBd0EQZB5vUD5jyH6JZANgevcATn6i52lv67Lr9QP5j4q9ZBSlLSaHZC2a78q8K9gGo15MtSAXLNtSsQtEdKDw7d0IrFsZAneuvgH9s0Ko9sHqzYQkdosvmyoyJEJV4GAB5aXZAu9k3MKMAZA2ZADwC5b5lKB2fzKLe0QZDZD';
-export const INSTAGRAM_ACCOUNT_ID: string = '814051691800923'; // Hardcoded ID
+export const FACEBOOK_PAGE_ID = '814051691800923';
+export const FACEBOOK_ACCESS_TOKEN = 'EAARotWwKo7ABQONHXF8ZCgqRJFk2LeZATKLccExZCSons2ZALlBlyZCWefXEuB8m2OOkUVgfZCLZB0mn1SoVLDsXkZCqgtAMGrGuOq6FATxZCLZCFRUo2mp51gX1VJRvqTTYWF3jXxJgzXxDqWHTOnMJbfLcDZCp68nzcoKb8n9vgW5U8S5D5BXru0sg3WJ2CLa71JXqqAErZAMwPxm2ZCmX3mPIWTaEcl9a9PnzBhQwjj1AZD';
+export const INSTAGRAM_ACCOUNT_ID: string = '814051691800923'; // Linked IG ID (if available)
 export const GRAPH_API_BASE_URL = 'https://graph.facebook.com';
 export const GRAPH_API_VERSION = 'v19.0';
 
@@ -27,4 +27,4 @@ export const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdX
 // ==========================================
 // 4. GOOGLE GEMINI AI
 // ==========================================
-export const GEMINI_API_KEY = 'AIzaSyBbv7INw1VSASeGj2_KISGRILfQEIDDi9k';
+export const GEMINI_API_KEY = process.env.API_KEY;

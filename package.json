@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "cron": "node cron/publisher.js",
     "tiktok-auth": "node tiktok-auth.js",
     "test-tweet": "node services/test-tweet.js"
   },

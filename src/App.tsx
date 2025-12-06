@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
+// تم استيراد generateAIImage الآن من facebookService
 import { 
   generateAIContent, 
   publishPost, 
@@ -7,21 +9,16 @@ import {
   updatePost, 
   generateAIImage, 
   delay,
-  fetchPosts
+  fetchPosts 
 } from './services/facebookService';
-import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_KEY } from './constants';
 
 // ==========================================
 // تعريف الثوابت
 // ==========================================
-const FACEBOOK_PAGE_ID = '870967939438361'; 
-const DEFAULT_ACCESS_TOKEN = 'EAARotWwKo7ABQPpV5JZALCt9crwm5jUdjdetqCBPIbwlh8YxnGkBO2nLVqjvOwDXm4T5Rb3VhCBmodTNwWZAZAUtTF9x5dmyXNCZBAOTBMZA0ZCijZBTFKkIrF88ZAWzsZCOr6QQ3v6KWPQiEG1jl18fZB1ATjLNqchmjdApiuZA9NkIN36pha21N5dJ3nQH2RjUV1ajzf0';
+const FACEBOOK_PAGE_ID = '814051691800923'; 
+const DEFAULT_ACCESS_TOKEN = 'EAARotWwKo7ABQONHXF8ZCgqRJFk2LeZATKLccExZCSons2ZALlBlyZCWefXEuB8m2OOkUVgfZCLZB0mn1SoVLDsXkZCqgtAMGrGuOq6FATxZCLZCFRUo2mp51gX1VJRvqTTYWF3jXxJgzXxDqWHTOnMJbfLcDZCp68nzcoKb8n9vgW5U8S5D5BXru0sg3WJ2CLa71JXqqAErZAMwPxm2ZCmX3mPIWTaEcl9a9PnzBhQwjj1AZD';
 
 const MAX_FILES = 10;
-
-// Supabase client للفرونت
-const supabaseBrowser = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // نوع بيانات البوست من Supabase
 type PostRecord = {
@@ -34,14 +31,6 @@ type PostRecord = {
   platforms: string[] | null;
   scheduled_at?: string | null;
   created_at?: string | null;
-};
-
-// نوع عناصر مكتبة الوسائط
-type MediaItem = {
-  name: string;
-  url: string;
-  type: 'image' | 'video';
-  createdAt?: string | null;
 };
 
 // --- قاموس الترجمة (عربي / إنجليزي) ---
@@ -92,14 +81,7 @@ const TRANSLATIONS = {
     platformFacebook: "فيسبوك",
     platformInstagram: "إنستجرام",
     platformTwitter: "تويتر",
-    platformTikTok: "تيك توك",
-
-    // Media Library
-    mediaLibrary: "مكتبة الوسائط",
-    mediaLibrarySubtitle: "كل الصور والفيديوهات التي رفعتها أو تم توليدها بالذكاء الاصطناعي",
-    useInPost: "استخدام في منشور جديد",
-    noMedia: "لا توجد وسائط بعد في هذا الحساب. ارفع أو أنشئ صورة أولاً.",
-    refreshMedia: "تحديث مكتبة الوسائط",
+    platformTikTok: "تيك توك"
   },
   en: {
     appTitle: "AutoPoster", pro: "PRO", connected: "Connected:", selectPlatforms: "Where to publish today?",
@@ -147,14 +129,7 @@ const TRANSLATIONS = {
     platformFacebook: "Facebook",
     platformInstagram: "Instagram",
     platformTwitter: "Twitter / X",
-    platformTikTok: "TikTok",
-
-    // Media Library
-    mediaLibrary: "Media Library",
-    mediaLibrarySubtitle: "All images and videos you uploaded or generated with AI",
-    useInPost: "Use in new post",
-    noMedia: "No media yet. Upload or generate an image first.",
-    refreshMedia: "Refresh Media Library",
+    platformTikTok: "TikTok"
   }
 };
 
@@ -211,7 +186,7 @@ function SettingsView({ t, setView, lang, setLang, darkMode, setDarkMode, access
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8 animate-fade-in-up">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => setView('dashboard')} className="p-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-white transition-all"><Icons.Home /></button>
+        <button onClick={() => setView('home')} className="p-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-white transition-all"><Icons.Home /></button>
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white brand-font">{t('settings')}</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm">إدارة حساباتك وتفضيلات التطبيق</p>
@@ -254,7 +229,7 @@ function SettingsView({ t, setView, lang, setLang, darkMode, setDarkMode, access
         <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-white/20 dark:border-slate-700 p-8">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2"><Icons.Globe /> {t('integrations')}</h3>
           <div className="space-y-3">
-            {['facebook', 'instagram', 'twitter', 'tiktok'].map((p: string) => (
+            {['facebook', 'instagram', 'twitter', 'tiktok'].map(p => (
               <div key={p} className="group flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900/50 hover:border-blue-200 dark:hover:border-blue-800 transition-all">
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-xl transition-colors ${p === 'facebook' ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-100' : p === 'instagram' ? 'bg-pink-50 text-pink-600 group-hover:bg-pink-100' : p === 'tiktok' ? 'bg-slate-100 text-black group-hover:bg-slate-200' : 'bg-sky-50 text-sky-500 group-hover:bg-sky-100'}`}>
@@ -283,7 +258,7 @@ function SettingsView({ t, setView, lang, setLang, darkMode, setDarkMode, access
 // ==========================================
 // Dashboard View (تاب رئيسية)
 // ==========================================
-function DashboardView({ t, posts, setView }: { t: (k: any) => string; posts: PostRecord[]; setView: (v: 'dashboard' | 'home' | 'settings' | 'library') => void }) {
+function DashboardView({ t, posts, setView }: { t: (k: any) => string; posts: PostRecord[]; setView: (v: 'dashboard' | 'home' | 'settings') => void }) {
   const [filter, setFilter] = useState<'today' | 'week' | 'month'>('week');
   const [animatedWeek, setAnimatedWeek] = useState(0);
   const [animatedTotal, setAnimatedTotal] = useState(0);
@@ -544,7 +519,7 @@ function DashboardView({ t, posts, setView }: { t: (k: any) => string; posts: Po
               ) : (
                 <div className="flex-1 flex items-end gap-2 h-40">
                   {chartData.map(([label, value]) => (
-                    <div key={label} className="flex-1 flex flex-col items:center gap-1">
+                    <div key={label} className="flex-1 flex flex-col items-center gap-1">
                       <div
                         className="w-full rounded-t-xl bg-gradient-to-t from-blue-500 to-indigo-400"
                         style={{ height: `${(value / maxBucket) * 100}%` }}
@@ -708,124 +683,6 @@ const PlatformPreview = ({ platform, message, previewUrl, fileType, t, lang, dar
 };
 
 // ==========================================
-// Media Library View (تاب مكتبة الوسائط)
-// ==========================================
-function MediaLibraryView({
-  t,
-  mediaItems,
-  loading,
-  onRefresh,
-  onUse,
-  setView,
-}: {
-  t: (k: any) => string;
-  mediaItems: MediaItem[];
-  loading: boolean;
-  onRefresh: () => void;
-  onUse: (item: MediaItem) => void;
-  setView: (v: 'dashboard' | 'home' | 'settings' | 'library') => void;
-}) {
-  return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6 animate-fade-in-up">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setView('home')}
-            className="p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-700 text-slate-200 transition-all"
-          >
-            <Icons.Home />
-          </button>
-          <div>
-            <h2 className="text-2xl font-extrabold text-slate-50 brand-font flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-2xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                <Icons.Image />
-              </span>
-              {t('mediaLibrary')}
-            </h2>
-            <p className="text-slate-400 text-sm mt-1">{t('mediaLibrarySubtitle')}</p>
-          </div>
-        </div>
-
-        <button
-          onClick={onRefresh}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-sm font-bold hover:bg-slate-800 transition-all"
-        >
-          {loading ? <span className="animate-spin"><Icons.Gear /></span> : '⟳'}
-          {t('refreshMedia')}
-        </button>
-      </div>
-
-      {/* Grid */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5">
-        {loading ? (
-          <div className="flex items-center justify-center py-16 text-slate-400 text-sm gap-2">
-            <span className="animate-spin"><Icons.Gear /></span>
-            <span>جارِ تحميل الوسائط...</span>
-          </div>
-        ) : mediaItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-slate-400 text-sm gap-2">
-            <span className="text-3xl mb-2">📁</span>
-            <p>{t('noMedia')}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {mediaItems.map((item) => (
-              <div
-                key={item.name}
-                className="group relative bg-slate-950/50 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-400/70 hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
-              >
-                <button
-                  type="button"
-                  onClick={() => onUse(item)}
-                  className="w-full h-full flex flex-col"
-                >
-                  <div className="relative w-full aspect-[4/5] bg-slate-900 overflow-hidden">
-                    {item.type === 'video' ? (
-                      <video
-                        src={item.url}
-                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                        muted
-                      />
-                    ) : (
-                      <img
-                        src={item.url}
-                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                      />
-                    )}
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 text-slate-100 flex items-center gap-1">
-                      {item.type === 'video' ? <Icons.Video /> : <Icons.Image />}
-                      <span>{item.type === 'video' ? 'VIDEO' : 'IMAGE'}</span>
-                    </div>
-                  </div>
-                  <div className="p-3 flex flex-col gap-1 text-left text-[11px] text-slate-300">
-                    <span className="truncate font-semibold">{item.name}</span>
-                    {item.createdAt && (
-                      <span className="text-slate-500 text-[10px]">
-                        {new Date(item.createdAt).toLocaleString('ar-EG', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        })}
-                      </span>
-                    )}
-                    <div className="mt-1">
-                      <span className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-200 text-[10px] font-bold group-hover:bg-cyan-500/20">
-                        <Icons.Send />
-                        {t('useInPost')}
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ==========================================
 // Main App Component
 // ==========================================
 export default function App() {
@@ -849,7 +706,7 @@ export default function App() {
   // Settings & Navigation
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [darkMode, setDarkMode] = useState(false);
-  const [view, setView] = useState<'dashboard' | 'home' | 'settings' | 'library'>('dashboard'); 
+  const [view, setView] = useState<'home' | 'dashboard' | 'settings'>('home'); 
   const t = (key: keyof typeof TRANSLATIONS['ar']) => TRANSLATIONS[lang][key];
 
   // Access Token Management
@@ -874,10 +731,6 @@ export default function App() {
   const [postsLoading, setPostsLoading] = useState(false);
   const [postFilter, setPostFilter] = useState<'all' | 'scheduled' | 'published'>('all');
 
-  // مكتبة الوسائط
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-  const [mediaLoading, setMediaLoading] = useState(false);
-
   const refreshPosts = async (overrideFilter?: 'all' | 'scheduled' | 'published') => {
     const filterToUse = overrideFilter || postFilter;
     setPostsLoading(true);
@@ -888,36 +741,6 @@ export default function App() {
       setStatus({ type: 'error', msg: err.message || 'فشل تحميل الأرشيف' });
     } finally {
       setPostsLoading(false);
-    }
-  };
-
-  const loadMediaLibrary = async () => {
-    setMediaLoading(true);
-    try {
-      const { data, error } = await supabaseBrowser
-        .storage
-        .from('facebook_media')
-        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
-
-      if (error) throw error;
-
-      const items: MediaItem[] = (data || []).map((obj: any) => {
-        const ext = (obj.name.split('.').pop() || '').toLowerCase();
-        const isVideo = ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext);
-        const { data: pub } = supabaseBrowser.storage.from('facebook_media').getPublicUrl(obj.name);
-        return {
-          name: obj.name,
-          url: pub.publicUrl,
-          type: isVideo ? 'video' : 'image',
-          createdAt: obj.created_at || null,
-        };
-      });
-
-      setMediaItems(items);
-    } catch (err: any) {
-      setStatus({ type: 'error', msg: err.message || 'فشل تحميل مكتبة الوسائط' });
-    } finally {
-      setMediaLoading(false);
     }
   };
 
@@ -953,12 +776,6 @@ export default function App() {
     refreshPosts('all');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (view === 'library') {
-      loadMediaLibrary();
-    }
-  }, [view]);
 
   const allPlatforms = ['facebook', 'instagram', 'twitter', 'tiktok'];
   const isAllSelected = selectedPlatforms.length === allPlatforms.length;
@@ -1143,6 +960,7 @@ export default function App() {
     setIsLoading(true);
     setStatus({ type: '', msg: scheduledTime ? t('scheduling') : t('publishing') });
 
+    // نستخدم أول ملف فقط حالياً في النشر (باقي الملفات ممكن نوسّع لها لاحقاً)
     const mainFile = hasLocalFiles ? selectedFiles[0] : null;
 
     try {
@@ -1152,6 +970,8 @@ export default function App() {
         setStatus({ type: 'success', msg: t('successSchedule') });
         setMessage(''); clearMedia(); setScheduledTime('');
       } else {
+        // لو فيه ملفات من الجهاز -> نخلي publicUrlFromClient = null
+        // لو مفيش ملفات و فيه صورة AI -> نستخدم لينك AI
         const publicUrlForBackend = hasLocalFiles ? null : (aiMediaUrl || null);
 
         const res = await publishPost(
@@ -1208,17 +1028,6 @@ export default function App() {
     } 
   };
 
-  // استخدام عنصر من مكتبة الوسائط في المحرر
-  const handleUseMediaFromLibrary = (item: MediaItem) => {
-    clearMedia();
-    setAiMediaUrl(item.url);
-    setAiMediaType(item.type);
-    setPreviewUrls([item.url]);
-    setFileTypes([item.type]);
-    setView('home');
-    setStatus({ type: 'success', msg: 'تم إدراج الوسيط من مكتبة الوسائط في المحرر ✅' });
-  };
-
   // معاينة: نعرض أول وسيط فقط
   const mainPreviewUrl = (selectedFiles.length > 0 ? previewUrls[0] : (aiMediaUrl || previewUrls[0])) || null;
   const mainPreviewType: 'image' | 'video' | null =
@@ -1228,27 +1037,45 @@ export default function App() {
 
   return (
     <div className={`${darkMode ? 'dark' : ''} h-screen overflow-hidden`}>
-      <div className="h-full bg-slate-950 font-sans text-slate-100 transition-colors duration-500 overflow-y-auto" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      <div className="h-full bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors duration-500 overflow-y-auto" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         
         {/* Navbar */}
-        <nav className="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-lg border-b border-slate-800/60 transition-all">
+        <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200/60 dark:border-slate-800/60 transition-all">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('dashboard')}>
+              <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('home')}>
                 <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-2 rounded-xl shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
                   <Icons.Send />
                 </div>
-                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-50 to-slate-300 brand-font tracking-tight">
+                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 brand-font tracking-tight">
                   {t('appTitle')}
                 </h1>
-                <span className="bg-indigo-500/20 text-indigo-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-400/40 uppercase tracking-wider">{t('pro')}</span>
+                <span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-800/50 uppercase tracking-wider">{t('pro')}</span>
               </div>
               
-              <div className="flex items-center gap-2 bg-slate-900 p-1 rounded-2xl border border-slate-800">
-                <button onClick={() => setView('dashboard')} className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'dashboard' ? 'bg-slate-800 text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-100'}`}><Icons.Chart /></button>
-                <button onClick={() => setView('home')} className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'home' ? 'bg-slate-800 text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-100'}`}><Icons.Home /></button>
-                <button onClick={() => setView('library')} className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'library' ? 'bg-slate-800 text-cyan-400 shadow-sm' : 'text-slate-400 hover:text-slate-100'}`}><Icons.Image /></button>
-                <button onClick={() => setView('settings')} className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'settings' ? 'bg-slate-800 text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-100'}`}><Icons.Gear /></button>
+              <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <button 
+                  onClick={() => setView('home')} 
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'home' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                >
+                  <Icons.Home />
+                </button>
+                <button
+                  onClick={() => setView('dashboard')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    view === 'dashboard'
+                      ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <Icons.Calendar />
+                </button>
+                <button 
+                  onClick={() => setView('settings')} 
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'settings' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                >
+                  <Icons.Gear />
+                </button>
               </div>
             </div>
           </div>
@@ -1257,7 +1084,7 @@ export default function App() {
         {/* Toast */}
         {status.msg && (
           <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[60] animate-bounce-in">
-            <div className={`px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md border border-white/10 flex items-center gap-3 ${
+            <div className={`px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md border border-white/20 flex items-center gap-3 ${
               status.type === 'error' 
               ? 'bg-red-500/90 text-white' 
               : status.type === 'success' ? 'bg-emerald-500/90 text-white' : 'bg-slate-800/90 text-white'
@@ -1269,19 +1096,17 @@ export default function App() {
         )}
 
         <main className="pt-24 pb-12 px-4 max-w-7xl mx-auto">
-          {view === 'dashboard' ? (
-            <DashboardView t={t} posts={posts} setView={setView} />
-          ) : view === 'home' ? (
+          {view === 'home' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in-up">
               {/* Editor Column */}
               <div className="lg:col-span-7 space-y-6">
                 {/* Platform Selector */}
-                <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-slate-800">
+                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-3xl p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-white/50 dark:border-slate-700">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">{t('selectPlatforms')}</h3>
+                    <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('selectPlatforms')}</h3>
                     <button
                       onClick={toggleSelectAll}
-                      className="text-xs font-bold text-blue-400 hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors border border-slate-700"
+                      className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors border border-transparent hover:border-blue-100 dark:hover:border-slate-600"
                     >
                       {isAllSelected ? t('deselectAll') : t('selectAll')}
                     </button>
@@ -1293,28 +1118,28 @@ export default function App() {
                         onClick={() => togglePlatform(p)} 
                         className={`relative group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all duration-300 ${
                           selectedPlatforms.includes(p) 
-                          ? 'bg-slate-900 border-blue-500 shadow-lg shadow-blue-500/20 scale-105 z-10' 
-                          : 'bg-slate-900/60 border-slate-800 hover:bg-slate-900 opacity-70 hover:opacity-100'
-                        } ${activePreview === p ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-950' : ''}`}
+                          ? 'bg-white dark:bg-slate-700 border-blue-500 shadow-lg shadow-blue-500/20 scale-105 z-10' 
+                          : 'bg-slate-50 dark:bg-slate-900 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 opacity-70 hover:opacity-100'
+                        } ${activePreview === p ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-800' : ''}`}
                       >
-                        <div className={`transition-transform duration-300 ${selectedPlatforms.includes(p) ? 'text-blue-400 scale-110' : 'text-slate-500 grayscale group-hover:grayscale-0'}`}>
+                        <div className={`transition-transform duration-300 ${selectedPlatforms.includes(p) ? 'text-blue-600 scale-110' : 'text-slate-400 grayscale group-hover:grayscale-0'}`}>
                           {p === 'facebook' && <Icons.Facebook />}
                           {p === 'instagram' && <Icons.Instagram />}
                           {p === 'twitter' && <Icons.Twitter />}
                           {p === 'tiktok' && <Icons.TikTok />}
                         </div>
-                        {selectedPlatforms.includes(p) && <div className="absolute top-2 right-2 text-blue-400"><Icons.Check /></div>}
-                        {activePreview === p && <div className="absolute -top-2 bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">Preview</div>}
+                        {selectedPlatforms.includes(p) && <div className="absolute top-2 right-2 text-blue-600"><Icons.Check /></div>}
+                        {activePreview === p && <div className="absolute top-[-8px] bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">Preview</div>}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Main Editor */}
-                <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-800 p-6 relative overflow-hidden">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-white/50 dark:border-slate-700 p-6 relative overflow-hidden">
                   {/* Header */}
                   <div className="flex justify-between items-center mb-6 relative z-10 gap-3">
-                    <h2 className="text-xl font-bold text-slate-50 brand-font">{t('editorTitle')}</h2>
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-white brand-font">{t('editorTitle')}</h2>
 
                     <div className="flex gap-2 flex-wrap">
                       <button 
@@ -1349,19 +1174,19 @@ export default function App() {
                     <textarea 
                       value={message} 
                       onChange={(e) => setMessage(e.target.value)} 
-                      className="w-full h-40 p-5 bg-slate-900/60 border border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-lg transition-all text-white resize-none placeholder-slate-500" 
+                      className="w-full h-40 p-5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-lg transition-all dark:text-white resize-none placeholder-slate-400" 
                       placeholder={t('placeholder')} 
                     />
                     <div className="absolute bottom-4 left-4 flex gap-2">
-                      <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 transition-colors">😊</button>
+                      <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 transition-colors">😊</button>
                     </div>
                     {showEmojiPicker && (
-                      <div className="absolute bottom-16 left-4 bg-slate-900 shadow-2xl p-3 grid grid-cols-5 w-64 z-50 rounded-2xl border border-slate-700 animate-fade-in-up">
+                      <div className="absolute bottom-16 left-4 bg-white dark:bg-slate-800 shadow-2xl p-3 grid grid-cols-5 w-64 z-50 rounded-2xl border border-slate-100 dark:border-slate-600 animate-fade-in-up">
                         {EMOJI_LIST.map(e => (
                           <button 
                             key={e} 
                             onClick={() => {setMessage(prev=>prev+e);setShowEmojiPicker(false)}} 
-                            className="text-2xl hover:bg-slate-800 p-2 rounded-lg transition-colors"
+                            className="text-2xl hover:bg-slate-100 dark:hover:bg-slate-700 p-2 rounded-lg transition-colors"
                           >
                             {e}
                           </button>
@@ -1375,8 +1200,8 @@ export default function App() {
                     onClick={() => fileInputRef.current?.click()} 
                     className={`group relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 ${
                       totalMediaCount > 0 
-                      ? 'border-emerald-400/50 bg-emerald-500/5' 
-                      : 'border-slate-700 hover:border-blue-400 hover:bg-slate-900'
+                      ? 'border-emerald-400/50 bg-emerald-50/50 dark:bg-emerald-900/10' 
+                      : 'border-slate-200 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                     }`}
                   >
                     <input
@@ -1390,55 +1215,55 @@ export default function App() {
                     {totalMediaCount > 0 ? (
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-3xl">🎉</span>
-                        <p className="text-emerald-300 font-bold text-lg">
+                        <p className="text-emerald-700 dark:text-emerald-400 font-bold text-lg">
                           تم اختيار {totalMediaCount} ملف (حد أقصى {MAX_FILES})
                         </p>
                         {selectedFiles.length > 0 && (
-                          <ul className="text-xs text-slate-300 max-h-24 overflow-y-auto">
+                          <ul className="text-xs text-slate-600 dark:text-slate-300 max-h-24 overflow-y-auto">
                             {selectedFiles.map((f, i) => (
                               <li key={i}>{f.name}</li>
                             ))}
                           </ul>
                         )}
                         {aiMediaUrl && (
-                          <p className="text-xs text-emerald-300">
+                          <p className="text-xs text-emerald-600 dark:text-emerald-300">
                             + صورة مولدة بالذكاء الاصطناعي
                           </p>
                         )}
                         <button
                           onClick={(e)=>{e.stopPropagation();clearMedia()}}
-                          className="text-xs bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-slate-300 hover:text-red-400 hover:border-red-400 transition-colors"
+                          className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-3 py-1 rounded-full text-slate-500 hover:text-red-500 hover:border-red-200 transition-colors"
                         >
                           إزالة الملفات
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 bg-blue-50 dark:bg-slate-700 text-blue-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                           <Icons.Upload />
                         </div>
-                        <p className="font-bold text-slate-100">{t('uploadClick')}</p>
-                        <p className="text-xs text-slate-500">{t('uploadFormat')}</p>
+                        <p className="font-bold text-slate-700 dark:text-slate-200">{t('uploadClick')}</p>
+                        <p className="text-xs text-slate-400">{t('uploadFormat')}</p>
                       </div>
                     )}
                   </div>
                   
                   {/* تعديل صورة AI فقط */}
                   {aiMediaUrl && (
-                    <div className="mt-4 pt-4 border-t border-slate-800 space-y-3 animate-fade-in-up">
-                      <p className="text-sm font-semibold text-slate-300">تعديل الصورة بالذكاء الاصطناعي:</p>
+                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3 animate-fade-in-up">
+                      <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">تعديل الصورة بالذكاء الاصطناعي:</p>
                       <div className="flex gap-2 flex-wrap">
                         <button 
                           onClick={() => handleAiImageEdit('إزالة الخلفية')}
                           disabled={isGenerating || isLoading}
-                          className="text-xs px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20 transition-colors disabled:opacity-50"
+                          className="text-xs px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 transition-colors disabled:opacity-50"
                         >
                           إزالة الخلفية
                         </button>
                         <button 
                           onClick={() => handleAiImageEdit('نمط كرتوني')}
                           disabled={isGenerating || isLoading}
-                          className="text-xs px-3 py-1.5 rounded-full bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                          className="text-xs px-3 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-200 transition-colors disabled:opacity-50"
                         >
                           نمط كرتوني
                         </button>
@@ -1447,14 +1272,14 @@ export default function App() {
                   )}
 
                   {/* Actions Footer */}
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-slate-800">
-                    <div className="flex items-center gap-3 bg-slate-900 p-2 pr-4 rounded-xl border border-slate-800">
-                      <div className="p-2 bg-slate-800 rounded-lg text-slate-400"><Icons.Calendar /></div>
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-2 pr-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <div className="p-2 bg-white dark:bg-slate-800 rounded-lg text-slate-500"><Icons.Calendar /></div>
                       <input
                         type="datetime-local"
                         value={scheduledTime}
                         onChange={(e) => setScheduledTime(e.target.value)}
-                        className="bg-transparent text-sm font-medium outline-none text-slate-100 w-full"
+                        className="bg-transparent text-sm font-medium outline-none dark:text-white w-full"
                       />
                     </div>
 
@@ -1474,8 +1299,8 @@ export default function App() {
                 </div>
 
                 {/* Management Panel + Timeline */}
-                <div className="bg-slate-900/70 backdrop-blur-sm rounded-3xl border border-slate-800 p-6 hover:bg-slate-900 transition-colors">
-                  <h3 className="font-bold text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-wide text-xs">{t('manageTitle')}</h3>
+                <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl border border-slate-200 dark:border-slate-700 p-6 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                  <h3 className="font-bold text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-wide text-xs">{t('manageTitle')}</h3>
                   
                   {/* التحكم في ID آخر بوست */}
                   <div className="flex gap-2 mb-4">
@@ -1484,33 +1309,33 @@ export default function App() {
                       value={lastPostId}
                       onChange={(e) => setLastPostId(e.target.value)}
                       placeholder={t('postIdPlaceholder')}
-                      className="flex-1 p-3 border border-slate-700 rounded-xl bg-slate-900 text-slate-100 text-sm font-mono focus:ring-2 focus:ring-slate-200 outline-none"
+                      className="flex-1 p-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-slate-200 outline-none"
                     />
                   </div>
                   <div className="flex gap-3">
                     <button
                       onClick={handleDelete}
-                      className="flex-1 bg-slate-900 text-slate-300 border border-slate-700 py-2.5 rounded-xl font-bold hover:bg-red-500/10 hover:text-red-400 hover:border-red-400 transition-all flex justify-center gap-2"
+                      className="flex-1 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all flex justify-center gap-2"
                     >
                       <Icons.Trash /> {t('deleteBtn')}
                     </button>
                     <button
                       onClick={() => { setEditMode(!editMode); if(!editMessage) setEditMessage(message); }}
-                      className="flex-1 bg-slate-900 text-slate-300 border border-slate-700 py-2.5 rounded-xl font-bold hover:bg-blue-500/10 hover:text-blue-400 hover:border-blue-400 transition-all flex justify-center gap-2"
+                      className="flex-1 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all flex justify-center gap-2"
                     >
                       <Icons.Edit /> {t('editBtn')}
                     </button>
                   </div>
                   {editMode && (
-                    <div className="mt-4 p-4 bg-slate-900 rounded-2xl border border-slate-800 animate-fade-in-up">
+                    <div className="mt-4 p-4 bg-slate-100 dark:bg-slate-900 rounded-2xl animate-fade-in-up">
                       <textarea
                         value={editMessage}
                         onChange={(e) => setEditMessage(e.target.value)}
-                        className="w-full h-24 p-3 border border-slate-700 bg-slate-950 text-slate-100 rounded-xl mb-3 outline-none resize-none"
+                        className="w-full h-24 p-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white rounded-xl mb-3 outline-none resize-none"
                       ></textarea>
                       <button
                         onClick={handleUpdate}
-                        className="w-full bg-slate-100 text-slate-900 py-2 rounded-xl font-bold hover:bg-white transition-colors"
+                        className="w-full bg-slate-800 text-white py-2 rounded-xl font-bold hover:bg-slate-700 transition-colors"
                       >
                         {t('saveBtn')}
                       </button>
@@ -1518,9 +1343,9 @@ export default function App() {
                   )}
 
                   {/* الخط الزمني / الأرشيف */}
-                  <div className="mt-6 pt-4 border-t border-slate-800">
+                  <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
                         <Icons.Calendar /> {t('timeline')}
                       </span>
                       <div className="flex items-center gap-1 text-xs">
@@ -1530,8 +1355,8 @@ export default function App() {
                             onClick={() => { setPostFilter(f); refreshPosts(f); }}
                             className={`px-2.5 py-1 rounded-full border text-[11px] font-bold ${
                               postFilter === f
-                                ? 'bg-slate-100 text-slate-900 border-slate-100'
-                                : 'bg-slate-900 text-slate-300 border-slate-700 hover:text-slate-50'
+                                ? 'bg-slate-900 text-white border-slate-900'
+                                : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-800 dark:hover:text-slate-200'
                             }`}
                           >
                             {f === 'all' ? t('allStatus') : f === 'scheduled' ? t('scheduledFilter') : t('publishedFilter')}
@@ -1539,7 +1364,7 @@ export default function App() {
                         ))}
                         <button
                           onClick={() => refreshPosts()}
-                          className="ml-1 px-2 py-1 rounded-full text-[11px] border border-slate-700 text-slate-500 hover:text-slate-200"
+                          className="ml-1 px-2 py-1 rounded-full text-[11px] border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                           title={t('refreshArchive')}
                         >
                           ⟳
@@ -1549,12 +1374,12 @@ export default function App() {
 
                     <div className="max-h-60 overflow-y-auto space-y-2">
                       {postsLoading ? (
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                           <div className="animate-spin"><Icons.Gear /></div>
                           <span>جاري تحميل الأرشيف...</span>
                         </div>
                       ) : posts.length === 0 ? (
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-400 dark:text-slate-500">
                           {t('noPosts')}
                         </p>
                       ) : (
@@ -1569,21 +1394,21 @@ export default function App() {
                                 setEditMode(false);
                               }
                             }}
-                            className="w-full text-left p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-500 hover:bg-slate-900/90 transition-colors text-xs"
+                            className="w-full text-left p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 hover:border-blue-300 hover:bg-blue-50/40 dark:hover:bg-slate-800 transition-colors text-xs"
                           >
                             <div className="flex justify-between items-center mb-1 gap-2">
-                              <span className="font-semibold text-slate-100 truncate">
+                              <span className="font-semibold text-slate-700 dark:text-slate-100 truncate">
                                 {(post.content || '').slice(0, 80)}{(post.content || '').length > 80 ? '…' : ''}
                               </span>
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 post.status === 'scheduled'
-                                  ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
-                                  : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                  : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                               }`}>
                                 {post.status === 'scheduled' ? t('scheduledFilter') : t('publishedFilter')}
                               </span>
                             </div>
-                            <div className="flex justify-between items-center text-[10px] text-slate-500 mt-1">
+                            <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 mt-1">
                               <span>
                                 {post.created_at
                                   ? new Date(post.created_at).toLocaleString(
@@ -1596,7 +1421,7 @@ export default function App() {
                                 {(post.platforms || []).map((p) => (
                                   <span
                                     key={p}
-                                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-800"
+                                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-100 dark:bg-slate-800"
                                   >
                                     {p === 'facebook' && <Icons.Facebook />}
                                     {p === 'instagram' && <Icons.Instagram />}
@@ -1617,12 +1442,12 @@ export default function App() {
               {/* Preview Column */}
               <div className="lg:col-span-5 hidden lg:flex flex-col items-center sticky top-28 gap-4">
                 {selectedPlatforms.length > 1 && (
-                  <div className="flex gap-2 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                  <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                     {selectedPlatforms.map(p => (
                       <button 
                         key={p}
                         onClick={() => setActivePreview(p)}
-                        className={`p-2 rounded-lg transition-all ${activePreview === p ? 'bg-slate-800 shadow text-blue-400' : 'text-slate-500 hover:text-slate-100'}`}
+                        className={`p-2 rounded-lg transition-all ${activePreview === p ? 'bg-white dark:bg-slate-700 shadow text-blue-600' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                       >
                         {p === 'facebook' && <Icons.Facebook />}
                         {p === 'instagram' && <Icons.Instagram />}
@@ -1644,16 +1469,13 @@ export default function App() {
                 />
               </div>
             </div>
-          ) : view === 'library' ? (
-            <MediaLibraryView
-              t={t}
-              mediaItems={mediaItems}
-              loading={mediaLoading}
-              onRefresh={loadMediaLibrary}
-              onUse={handleUseMediaFromLibrary}
-              setView={setView}
-            />
-          ) : (
+          )}
+
+          {view === 'dashboard' && (
+            <DashboardView t={t} posts={posts} setView={setView} />
+          )}
+
+          {view === 'settings' && (
             <SettingsView 
               t={t} 
               setView={setView} 
