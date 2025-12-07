@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 // تم استيراد generateAIImage الآن من facebookService
 import { 
@@ -823,6 +822,7 @@ export default function App() {
 
     const primaryPlatform = selectedPlatforms[0];
     const isVideoPlatform = primaryPlatform === 'tiktok' || primaryPlatform === 'instagram';
+    const isInstagram = selectedPlatforms.includes('instagram');
 
     let combinedPrompt = '';
     const preferredLang = lang === 'ar' ? 'العربية' : 'English';
@@ -831,6 +831,11 @@ export default function App() {
       combinedPrompt = `Act as an expert content creator specializing in short-form video (TikTok/Reels). Based on the topic: "${message}", generate a concise and engaging VIDEO SCRIPT in ${preferredLang} and English. The script must include: 1. A catchy Hook, 2. Brief Scene Description (for visual), and 3. A strong Call-to-Action. Keep it under 60 seconds of speaking time.`;
     } else {
       combinedPrompt = `Act as an expert content creator. Generate a creative and inspiring post based on the following topic, ensuring the response is fluent and grammatically correct in both ARABIC and ENGLISH. DO NOT suggest generating images or any media; just provide the engaging post text: "${message}"`;
+    }
+
+    // 🛑 Enforce specific character limit for Instagram
+    if (isInstagram) {
+      combinedPrompt += " IMPORTANT: Ensure the caption is under 2000 characters to comply with Instagram limits.";
     }
 
     try {

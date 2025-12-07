@@ -298,6 +298,11 @@ create policy "Public Upload" on storage.objects for insert with check ( bucket_
     // INSTAGRAM PUBLISHING (REAL)
     // ==========================================
     if (platforms.includes('instagram')) {
+      // 🛑 Pre-Check: Validate Caption Length (Max 2200 chars for Instagram)
+      if (message.length > 2200) {
+        throw new Error("⚠️ النص طويل جداً لإنستجرام! الحد الأقصى 2200 حرف. يرجى تقليل النص قبل النشر.");
+      }
+
       if (!mediaUrl) {
         results.push("Instagram (Skipped: Requires Image/Video)");
       } else {
@@ -401,6 +406,8 @@ create policy "Public Upload" on storage.objects for insert with check ( bucket_
             friendlyError = "Invalid Instagram ID or Page not correctly linked.";
           } else if (errMsg.includes('instagram_business_account')) {
             friendlyError = "Page not linked to Instagram Business Account";
+          } else if (errData?.code === 36004 || errMsg.includes('caption was too long')) {
+            friendlyError = "النص طويل جداً (تجاوز 2200 حرف). يرجى تقليل النص.";
           }
 
           results.push(`Instagram Failed: ${friendlyError}`);
