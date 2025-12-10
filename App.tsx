@@ -1108,7 +1108,7 @@ export default function App() {
     const newTypes: ('image' | 'video')[] = [];
     const newUrls: string[] = [];
 
-    toAdd.forEach(f => {
+    toAdd.forEach((f: File) => {
       newTypes.push(f.type.startsWith('video/') ? 'video' : 'image');
       newUrls.push(URL.createObjectURL(f));
     });

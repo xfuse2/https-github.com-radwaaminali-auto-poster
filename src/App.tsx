@@ -11,6 +11,9 @@ import {
   fetchPosts 
 } from './services/facebookService';
 
+// Import AI Studio Component
+import AIStudio from './components/AIStudio/AIStudio';
+
 // ==========================================
 // تعريف الثوابت
 // ==========================================
@@ -705,7 +708,7 @@ export default function App() {
   // Settings & Navigation
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [darkMode, setDarkMode] = useState(false);
-  const [view, setView] = useState<'home' | 'dashboard' | 'settings'>('home'); 
+  const [view, setView] = useState<'home' | 'dashboard' | 'settings' | 'ai-studio'>('home'); 
   const t = (key: keyof typeof TRANSLATIONS['ar']) => TRANSLATIONS[lang][key];
 
   // Access Token Management
@@ -930,7 +933,7 @@ export default function App() {
     const newTypes: ('image' | 'video')[] = [];
     const newUrls: string[] = [];
 
-    toAdd.forEach(f => {
+    toAdd.forEach((f: File) => {
       newTypes.push(f.type.startsWith('video/') ? 'video' : 'image');
       newUrls.push(URL.createObjectURL(f));
     });
@@ -1074,6 +1077,13 @@ export default function App() {
                   }`}
                 >
                   <Icons.Calendar />
+                </button>
+                <button 
+                   onClick={() => setView('ai-studio')} 
+                   className={`p-2.5 rounded-xl transition-all duration-300 ${view === 'ai-studio' ? 'bg-white dark:bg-slate-700 text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                   title="AI Studio"
+                >
+                  <Icons.Magic />
                 </button>
                 <button 
                   onClick={() => setView('settings')} 
@@ -1494,6 +1504,10 @@ export default function App() {
               setConnectionStatus={setConnectionStatus}
               setStatus={setStatus}
             />
+          )}
+
+          {view === 'ai-studio' && (
+             <AIStudio />
           )}
         </main>
       </div>

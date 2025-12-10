@@ -1,3 +1,5 @@
+// Load environment variables
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -10,41 +12,65 @@ const { TwitterApi } = require('twitter-api-v2');
 const cron = require('node-cron');
 const { createClient } = require('@supabase/supabase-js');
 
+// ============================================
+// AI STUDIO ROUTES (NEW)
+// ============================================
+const aiStudioRoutes = require('./routes/ai-studio.routes');
+
+// Add rate limiting for AI endpoints
+const rateLimit = require('express-rate-limit');
+
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // limit each IP to 30 requests per windowMs
+  message: {
+    success: false,
+    error: 'Too many AI requests from this IP, please try again after 15 minutes.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
 
+// Use the AI Studio routes with rate limiting
+app.use('/api/ai-studio', aiLimiter, aiStudioRoutes);
+
+console.log('✅ AI Studio routes loaded at /api/ai-studio');
+
 // ==========================================
 // ⚠️ البيانات (Facebook & Gemini)
 // ==========================================
-const PAGE_ID = '814051691800923'; 
-const ACCESS_TOKEN = 'EAARotWwKo7ABQONHXF8ZCgqRJFk2LeZATKLccExZCSons2ZALlBlyZCWefXEuB8m2OOkUVgfZCLZB0mn1SoVLDsXkZCqgtAMGrGuOq6FATxZCLZCFRUo2mp51gX1VJRvqTTYWF3jXxJgzXxDqWHTOnMJbfLcDZCp68nzcoKb8n9vgW5U8S5D5BXru0sg3WJ2CLa71JXqqAErZAMwPxm2ZCmX3mPIWTaEcl9a9PnzBhQwjj1AZD';
-const GEMINI_API_KEY = 'AIzaSyBbv7INw1VSASeGj2_KISGRILfQEIDDi9k';
+const PAGE_ID = process.env.FACEBOOK_PAGE_ID || '814051691800923'; 
+const ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN || 'EAARotWwKo7ABQONHXF8ZCgqRJFk2LeZATKLccExZCSons2ZALlBlyZCWefXEuB8m2OOkUVgfZCLZB0mn1SoVLDsXkZCqgtAMGrGuOq6FATxZCLZCFRUo2mp51gX1VJRvqTTYWF3jXxJgzXxDqWHTOnMJbfLcDZCp68nzcoKb8n9vgW5U8S5D5BXru0sg3WJ2CLa71JXqqAErZAMwPxm2ZCmX3mPIWTaEcl9a9PnzBhQwjj1AZD';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBbv7INw1VSASeGj2_KISGRILfQEIDDi9k';
 
 // ==========================================
 // ⚠️ بيانات SUPABASE (للجدولة والوسائط)
 // ==========================================
-const SUPABASE_URL = 'https://kolpjpsxjhgkxfgptutz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbHBqcHN4amhna3hmZ3B0dXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NzA0NzIsImV4cCI6MjA4MDI0NjQ3Mn0.xYJEyLglKC7QLiXRIYu2iGPKt3NaH8p9DrlYNxiyiss';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://kolpjpsxjhgkxfgptutz.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbHBqcHN4amhna3hmZ3B0dXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NzA0NzIsImV4cCI6MjA4MDI0NjQ3Mn0.xYJEyLglKC7QLiXRIYu2iGPKt3NaH8p9DrlYNxiyiss';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==========================================
 // ⚠️ بيانات تويتر (Twitter Keys)
 // ==========================================
 const twitterClient = new TwitterApi({
-    appKey: 'Cty1K5107L65apjLNrsfDUSvG',
-    appSecret: '7MLJJKyZROJboQIWiii7h2x8VmBFc9Kp1xPATe5ubOy8vpByaO',
-    accessToken: '1996499677689352192-CMmMaZGkp6dUh0SPnaXLbX7kHkiwtQ',
-    accessSecret: 'b6TCvRDd8KVVxJ1gxd3x8fRZlI3kc2Bw2L98E8ObNSaU1',
+    appKey: process.env.TWITTER_APP_KEY || 'Cty1K5107L65apjLNrsfDUSvG',
+    appSecret: process.env.TWITTER_APP_SECRET || '7MLJJKyZROJboQIWiii7h2x8VmBFc9Kp1xPATe5ubOy8vpByaO',
+    accessToken: process.env.TWITTER_ACCESS_TOKEN || '1996499677689352192-CMmMaZGkp6dUh0SPnaXLbX7kHkiwtQ',
+    accessSecret: process.env.TWITTER_ACCESS_SECRET || 'b6TCvRDd8KVVxJ1gxd3x8fRZlI3kc2Bw2L98E8ObNSaU1',
 });
 
 // ==========================================
 // ⚠️ بيانات تيك توك (TikTok Token)
 // ==========================================
 // 👇👇👇 الصق التوكن الطويل هنا (داخل علامات التنصيص) 👇👇👇
-const TIKTOK_ACCESS_TOKEN = 'PASTE_YOUR_TIKTOK_TOKEN_HERE'; 
+const TIKTOK_ACCESS_TOKEN = process.env.TIKTOK_ACCESS_TOKEN || 'PASTE_YOUR_TIKTOK_TOKEN_HERE'; 
 // ==========================================
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -289,5 +315,5 @@ app.delete('/delete/:dbId', async (req, res) => {
     });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
